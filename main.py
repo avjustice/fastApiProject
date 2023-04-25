@@ -1,6 +1,16 @@
 from fastapi import FastAPI
+import models, schemas
+from database import SessionLocal, engine
 
 app = FastAPI()
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/")
