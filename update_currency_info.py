@@ -1,35 +1,39 @@
 from sqlalchemy.orm import Session
 import models
-from database import SessionLocal, engine
+from database import SessionLocal, engine, get_db
 from parsing import get_full_currency_info, get_currency_info
-import schemas
-import asyncio
+import schedule
+import time
+import sqlalchemy.exc
 
 
-def insert_into_currency(session: Session, currency: models.Currency):
-    session.add(currency)
-    session.commit()
+def insert(db: Session):
+    full_currency_info = get_full_currency_info()
+    for code, name, rate in full_currency_info:
+        currency = models.Currency(code=code, name=name, rate=rate)
+        db.add(currency)
+        db.commit()
+    print('Inserted')
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def update(db: Session = SessionLocal()):
+    updated_info = get_currency_info()
+    for code, rate in updated_info.items():
+        db.query(models.Currency).filter(models.Currency.code == code).update({'rate': rate})
+        db.commit()
+    print('Updated')
 
 
 def main():
-    # print(SessionLocal, SessionLocal())
-    # currency_info = get_currency_info()
-    # print(currency_info)
-    full_currency_info = get_full_currency_info()
-    print(full_currency_info)
-    for code, name, rate in full_currency_info:
-        print(code, name, rate)
-        currency = models.Currency(code=code, name=name, rate=rate)
-        a = get_db()
-        insert_into_currency(next(a), currency)
+    models.Base.metadata.create_all(bind=engine)
+    try:
+        insert(SessionLocal())
+    except sqlalchemy.exc.IntegrityError:
+        pass
+    schedule.every(3).hours.do(update, db=SessionLocal())
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 if __name__ == '__main__':

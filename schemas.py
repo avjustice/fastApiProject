@@ -21,4 +21,5 @@ class CurrencyRequest(BaseModel):
 
 
 class CurrencyResponse(BaseModel):
+    code: str = Field(max_length=3, min_length=3)
     amount: float = Field(gt=0)
