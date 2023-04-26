@@ -1,9 +1,13 @@
 from pydantic import BaseModel, Field
 
 
+class CurrencyUnknown(BaseModel):
+    message: str
+
+
 class CurrencyInfo(BaseModel):
     code: str = Field(max_length=3, min_length=3)
-    name: str
+    name: str = Field(max_length=100)
     rate: float = Field(gt=0)
 
     class Config:

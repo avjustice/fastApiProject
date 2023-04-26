@@ -6,7 +6,7 @@ HEADERS = {
 }
 
 
-def update_currency_info():
+def get_currency_info():
     response = requests.get(url='https://api.apilayer.com/exchangerates_data/latest?base=USD', headers=HEADERS)
     return response.json().get('rates')
 
@@ -18,7 +18,7 @@ def get_currency_name():
 
 def get_full_currency_info():
     names = get_currency_name()
-    rates = update_currency_info()
+    rates = get_currency_info()
     currency_info = []
     for k, v in names.items():
         currency_info.append((k, v, rates[k]))
