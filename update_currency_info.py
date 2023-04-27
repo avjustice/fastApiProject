@@ -7,7 +7,7 @@ import time
 import sqlalchemy.exc
 
 
-def insert(db: Session):
+def insert(db: Session) -> None:
     full_currency_info = get_full_currency_info()
     for code, name, rate in full_currency_info:
         currency = models.Currency(code=code, name=name, rate=rate)
@@ -16,7 +16,7 @@ def insert(db: Session):
     print('Inserted')
 
 
-def update(db: Session = SessionLocal()):
+def update(db: Session = SessionLocal()) -> None:
     updated_info = get_currency_info()
     for code, rate in updated_info.items():
         db.query(models.Currency).filter(models.Currency.code == code).update({'rate': rate})
@@ -24,7 +24,7 @@ def update(db: Session = SessionLocal()):
     print('Updated')
 
 
-def main():
+def main() -> None:
     models.Base.metadata.create_all(bind=engine)
     try:
         insert(SessionLocal())
